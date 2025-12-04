@@ -3,76 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Proforma / PI / Tax Invoice Generator — Professional</title>
+  <title>Personal / Proforma / Tax Invoice Generator</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
-    /* --- Classic printable invoice aesthetic + modern polish --- */
     :root{
-      --accent:#0f172a; /* slate-900 */
-      --muted:#6b7280; /* gray-500 */
-      --brand:#0ea5a4; /* teal-400 */
-      --paper-bg: #ffffff;
-      --page-width: 800px; /* used for preview */
+      --accent:#0f172a;
+      --muted:#6b7280;
+      --brand:#0ea5a4;
+      --paper-bg:#ffffff;
+      --page-width:800px;
     }
     html,body{height:100%;}
-    body{background:#f3f4f6; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color: #0f172a;}
-    .card{background:var(--paper-bg); border-radius:10px; padding:18px; box-shadow:0 6px 18px rgba(15,23,42,0.06);} 
-    .lite{color:var(--muted);} 
-
-    /* Invoice preview area (paper-like) */
-    #invoicePreview{width:var(--page-width); margin:0 auto; padding:28px; background:linear-gradient(180deg,#fff,#fcfcfd); border-radius:8px;}
-    .paper{background:transparent;}
+    body{background:#f3f4f6;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#0f172a;}
+    .card{background:var(--paper-bg);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06);}
+    .lite{color:var(--muted);}
+    #invoicePreview{width:var(--page-width);margin:0 auto;padding:28px;background:linear-gradient(180deg,#fff,#fcfcfd);border-radius:8px;}
     .logo{max-height:80px;}
-
-    table{border-collapse:collapse; width:100%;}
-    th,td{padding:8px 10px; border-bottom:1px solid rgba(15,23,42,0.06);}
-    th{font-weight:600; text-align:left; font-size:13px; color:var(--muted);} 
-    td.num{text-align:right;}
-
-    .right{text-align:right}
-    .muted{color:var(--muted)}
-
-    /* Header styles */
-    .inv-header{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
-    .inv-company{max-width:60%;}
-    .inv-meta{min-width:200px; text-align:right}
-
-    /* Summary box */
-    .summary { border-radius:8px; padding:12px; border:1px solid rgba(15,23,42,0.06); background:#fbfdff }
-
-    /* Footer small print */
-    .small{font-size:12px; color:var(--muted)}
-
-    /* Controls hidden for print */
+    table{border-collapse:collapse;width:100%}
+    th,td{padding:8px 10px;border-bottom:1px solid rgba(15,23,42,0.06)}
+    th{font-weight:600;text-align:left;font-size:13px;color:var(--muted)}
+    td.num{text-align:right}
+    .inv-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .summary{border-radius:8px;padding:12px;border:1px solid rgba(15,23,42,0.06);background:#fbfdff}
+    .small{font-size:12px;color:var(--muted)}
     @media print{ .no-print{display:none!important;} body{background:white;} #invoicePreview{box-shadow:none;} }
-
-    /* Responsive */
     @media (max-width:900px){ #invoicePreview{width:100%} }
-
-    /* Multi-page helpers for PDF generation */
-    .page-break { page-break-after: always; }
-
-    /* Decorative accent line */
-    .accent-line{height:6px; background:linear-gradient(90deg,var(--brand), rgba(14,165,164,0.15)); border-radius:4px;}
-
-    /* Signature box */
-    .sign-box{border-top:1px dashed rgba(15,23,42,0.08); padding-top:12px; margin-top:14px}
-
-    /* Fancy table header */
-    .items thead th{background:transparent;}
-
-    /* Compact print-friendly fonts */
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;} 
+    .accent-line{height:6px;background:linear-gradient(90deg,var(--brand), rgba(14,165,164,0.15));border-radius:4px}
+    .sign-box{border-top:1px dashed rgba(15,23,42,0.08);padding-top:12px;margin-top:14px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace}
+    .info{font-size:12px;color:#374151}
+    .hidden{display:none}
+    .muted-small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body class="p-6">
   <div class="max-w-7xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-semibold">Professional Invoice / PI Generator</h1>
+      <h1 class="text-2xl font-semibold">Invoice Generator</h1>
       <div class="no-print">
         <button id="loadSample" class="px-3 py-1 bg-indigo-600 text-white rounded">Load sample</button>
         <button id="saveJSON" class="px-3 py-1 bg-emerald-600 text-white rounded">Save JSON</button>
@@ -80,27 +53,64 @@
       </div>
     </div>
 
+    <!-- Top inputs -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 no-print">
       <div class="col-span-2 card">
-        <h2 class="font-medium mb-2">Company / Supplier (From)</h2>
+        <h2 class="font-medium mb-2">Supplier / Issuer (From)</h2>
         <div class="grid grid-cols-2 gap-2">
-          <input id="companyName" placeholder="Company name" class="border p-2 rounded" value="Ellectra Innovations Pvt Ltd">
-          <input id="companyGST" placeholder="Company GSTIN" class="border p-2 rounded" value="33ABCDE1234F1Z5">
-          <textarea id="companyAddress" placeholder="Address" class="border p-2 rounded col-span-2">12, Industrial Park, Chennai, Tamil Nadu - 600001</textarea>
+          <input id="companyName" placeholder="Name (company or your name)" class="border p-2 rounded" value="ELLECTRA ELECTRONICS">
           <input id="companyPhone" placeholder="Phone" class="border p-2 rounded" value="+91 98765 43210">
+
+          <!-- Supplier GSTIN optional (visible but optional) -->
+          <input id="companyGST" placeholder="Company / Your GSTIN (optional)" class="border p-2 rounded" value="">
           <input id="companyEmail" placeholder="Email" class="border p-2 rounded" value="accounts@ellectra.com">
-          <input id="bankDetails" placeholder="Bank details" class="border p-2 rounded col-span-2">SB A/C: 1234567890, IFSC: SBIN0001234, Branch: Chennai</input>
+
+          <textarea id="companyAddress" placeholder="Address" class="border p-2 rounded col-span-2">12, Industrial Park, Chennai, Tamil Nadu - 600001</textarea>
+
+          <!-- Payment fields -->
+          <input id="bankName" placeholder="Bank Name" class="border p-2 rounded" value="State Bank of India">
+          <input id="bankAccount" placeholder="Bank A/C number" class="border p-2 rounded" value="1234567890">
+          <input id="ifsc" placeholder="IFSC" class="border p-2 rounded" value="SBIN0001234">
+          <input id="bankBranch" placeholder="Branch" class="border p-2 rounded" value="Chennai">
+          <input id="upiId" placeholder="UPI ID (e.g. name@bank)" class="border p-2 rounded" value="ellectra@upi">
+          <input id="paymentNote" placeholder="Payment note (shown on preview)" class="border p-2 rounded" value="Please pay via NEFT/UPI within 30 days">
         </div>
       </div>
 
       <div class="card">
         <h2 class="font-medium mb-2">Invoice meta</h2>
         <div class="space-y-2">
-          <select id="docType" class="border p-2 rounded w-full">
+          <select id="docType" class="border p-2 rounded w-full" title="Choose the document type">
             <option value="Tax Invoice">Tax Invoice</option>
             <option value="Proforma Invoice">Proforma Invoice</option>
-            <option value="PI">PI</option>
+            <option value="Personal Invoice">Personal Invoice</option>
+            <option value="PI">PI — Personal Invoice</option>
           </select>
+
+          <div class="muted-small">GST will be applied only when <strong>Customer GSTIN</strong> is entered below.</div>
+
+          <div id="gstControls" class="space-y-1 hidden">
+            <div class="info">Customer GSTIN detected — you can enable/disable GST here</div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="gstEnabledOverride" />
+              <label for="gstEnabledOverride" class="text-sm">Enable GST (override)</label>
+            </div>
+            <div class="flex gap-2">
+              <select id="gstType" class="border p-2 rounded w-1/2">
+                <option value="cgst_sgst">CGST + SGST (intra-state)</option>
+                <option value="igst">IGST (inter-state)</option>
+                <option value="no_gst">No GST / Exempt</option>
+              </select>
+              <select id="gstPercent" class="border p-2 rounded w-1/2">
+                <option>0</option>
+                <option>5</option>
+                <option selected>12</option>
+                <option>18</option>
+                <option>28</option>
+              </select>
+            </div>
+          </div>
+
           <input id="invoiceNo" placeholder="Invoice No" class="border p-2 rounded w-full" value="INV-2025-0423">
           <input id="invoiceDate" type="date" class="border p-2 rounded w-full">
           <input id="dueDate" type="date" class="border p-2 rounded w-full">
@@ -110,17 +120,22 @@
       </div>
     </div>
 
+    <!-- Customer -->
     <div class="card mb-6">
       <h2 class="font-medium mb-2">Bill To (Customer)</h2>
       <div class="grid grid-cols-2 gap-2">
         <input id="customerName" placeholder="Customer name" class="border p-2 rounded" value="DroneTech Pvt Ltd">
-        <input id="customerGST" placeholder="Customer GSTIN" class="border p-2 rounded" value="27XYZAB1234C1Z9">
-        <textarea id="customerAddress" placeholder="Customer address" class="border p-2 rounded col-span-2">78, Tech Park, Bangalore, Karnataka - 560001</textarea>
         <input id="customerPhone" placeholder="Phone" class="border p-2 rounded" value="+91 91234 56789">
+
+        <!-- Customer GSTIN optional; when entered, GSTControls appear -->
+        <input id="customerGST" placeholder="Customer GSTIN (enter to enable GST)" class="border p-2 rounded" value="">
         <input id="customerEmail" placeholder="Email" class="border p-2 rounded" value="purchase@dronetech.com">
+
+        <textarea id="customerAddress" placeholder="Customer address" class="border p-2 rounded col-span-2">78, Tech Park, Bangalore, Karnataka - 560001</textarea>
       </div>
     </div>
 
+    <!-- Items -->
     <div class="card mb-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-medium">Items / Services</h2>
@@ -159,29 +174,14 @@
           <div class="mb-2">Subtotal: <span id="subtotal" class="font-medium">0.00</span></div>
           <div class="mb-2">Discount total: <span id="discountTotal" class="font-medium">0.00</span></div>
           <div class="mb-2">Taxable Value: <span id="taxableValue" class="font-medium">0.00</span></div>
-          <div class="mb-2">GST Type: 
-            <select id="gstType" class="border p-1 rounded ml-2">
-              <option value="cgst_sgst">CGST + SGST (intra-state)</option>
-              <option value="igst">IGST (inter-state)</option>
-              <option value="no_gst">No GST / Exempt</option>
-            </select>
-          </div>
-          <div class="mb-2">GST Rate (select):
-            <select id="gstPercent" class="border p-1 rounded ml-2">
-              <option>0</option>
-              <option>5</option>
-              <option selected>12</option>
-              <option>18</option>
-              <option>28</option>
-            </select>
-          </div>
-          <div class="mb-2">GST Amount: <span id="gstAmount" class="font-medium">0.00</span></div>
+          <div id="gstSummaryRow" class="mb-2 hidden">GST Amount: <span id="gstAmount" class="font-medium">0.00</span></div>
           <div class="text-xl font-semibold">Grand Total: <span id="grandTotal">0.00</span></div>
           <div class="small mt-2 lite">Amount (in words): <div id="amountWords" class="font-medium mono">Zero Rupees Only</div></div>
         </div>
       </div>
     </div>
 
+    <!-- Actions -->
     <div class="flex gap-2 mb-8 no-print">
       <button id="previewBtn" class="px-4 py-2 bg-green-600 text-white rounded">Preview</button>
       <button id="generatePdfBtn" class="px-4 py-2 bg-indigo-600 text-white rounded">Generate PDF</button>
@@ -189,16 +189,15 @@
       <button id="resetBtn" class="px-4 py-2 bg-gray-300 rounded">Reset</button>
     </div>
 
-    <!-- Invoice preview area (paper-like) -->
+    <!-- Preview -->
     <div id="invoicePreview" class="card">
-      <!-- built dynamically -->
       <div id="previewInner" class="paper" style="padding:18px"></div>
     </div>
 
-    <footer class="text-center lite mt-6">Generated by Ellectra — customize this template as needed.</footer>
+    <footer class="text-center lite mt-6">Generated by ELLECTRA ELECTRONICS — customize as needed.</footer>
   </div>
 
-  <!-- Catalog modal (simple) -->
+  <!-- Catalog Modal -->
   <div id="catalogModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50">
     <div class="bg-white rounded p-4 w-[900px] max-w-full">
       <div class="flex justify-between items-center mb-2">
@@ -215,10 +214,9 @@
   </div>
 
 <script>
-/* ------------------------ Utilities ------------------------ */
+/* ----------------- Utilities ----------------- */
 function fmt(n){ return Number(n||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function toWords(num){ // convert number to Indian Rupees words (simple)
-  // Very lightweight implementation for demonstration (handles upto crores)
+function toWords(num){
   const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
   const b=['','', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
   function inWords(n){
@@ -232,17 +230,14 @@ function toWords(num){ // convert number to Indian Rupees words (simple)
   let i=0; let str='';
   while(num>0){
     let chunk = num%1000;
-    if(i===1){ // thousands group is two digits in Indian system
-      chunk = num%100;
-      num = Math.floor(num/100);
-    }
+    if(i===1){ chunk = num%100; num = Math.floor(num/100); }
     if(chunk) str = inWords(chunk) + (units[i]? ' ' + units[i] : '') + (str? ' ' + str : '');
     i++; num = Math.floor(num/1000);
   }
   return str + ' Rupees Only';
 }
 
-/* ------------------------ State ------------------------ */
+/* ----------------- State ----------------- */
 let items = [];
 let catalog = [
   {desc:'Li-Po Battery 2000mAh 3.7V', hsn:'85076000', rate:450, sku:'LP2000'},
@@ -250,7 +245,7 @@ let catalog = [
   {desc:'Arduino Nano', hsn:'85371010', rate:250, sku:'ARDU-NANO'},
 ];
 
-/* ------------------------ Items table management ------------------------ */
+/* ----------------- Items management ----------------- */
 function addItem(row){ items.push(row || {desc:'Item description', hsn:'', qty:1, rate:0, discount:0}); renderItems(); }
 function removeItem(idx){ items.splice(idx,1); renderItems(); }
 function renderItems(){
@@ -270,21 +265,68 @@ function renderItems(){
     `;
     body.appendChild(tr);
   });
-  // attach listeners
-  body.querySelectorAll('input').forEach(inp=>{ inp.onchange = ()=>{ const i=Number(inp.dataset.i), f=inp.dataset.field; const val=(f==='desc'||f==='hsn')? inp.value : Number(inp.value||0); items[i][f]=val; renderItems(); }; });
+
+  body.querySelectorAll('input').forEach(inp=>{
+    inp.onchange = ()=>{
+      const i=Number(inp.dataset.i), f=inp.dataset.field;
+      const val=(f==='desc'||f==='hsn')? inp.value : Number(inp.value||0);
+      items[i][f]=val; renderItems();
+    };
+  });
   recalcTotals();
 }
 
+/* ----------------- GST logic controlled by Customer GSTIN ----------------- */
+function checkCustomerGstPresence(){
+  const custGst = (document.getElementById('customerGST').value || '').trim();
+  const gstControls = document.getElementById('gstControls');
+  const gstSummaryRow = document.getElementById('gstSummaryRow');
+  if(custGst){
+    gstControls.classList.remove('hidden');
+    // default: enable gst unless user overrides checkbox
+    if(!document.getElementById('gstEnabledOverride').checked) document.getElementById('gstEnabledOverride').checked = true;
+  } else {
+    // hide and reset override
+    gstControls.classList.add('hidden');
+    document.getElementById('gstEnabledOverride').checked = false;
+    gstSummaryRow.classList.add('hidden');
+  }
+  recalcTotals();
+}
+
+/* Manual override listener: if user unchecks override, GST not applied though GSTIN present */
+document.addEventListener('change', (e)=>{
+  if(e.target && e.target.id === 'gstEnabledOverride'){
+    recalcTotals();
+  }
+});
+
+/* Also listen for changes to customerGST to auto toggle */
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id === 'customerGST'){
+    checkCustomerGstPresence();
+  }
+});
+
+/* ----------------- Recalc totals ----------------- */
 function recalcTotals(){
   let subtotal=0, discountTotal=0;
-  items.forEach(it=>{ const line = (Number(it.qty)||0)*(Number(it.rate)||0); subtotal+=line; discountTotal+=Number(it.discount)||0; });
+  items.forEach(it=>{ const line = (Number(it.qty)||0)*(Number(it.rate)||0); subtotal += line; discountTotal += Number(it.discount)||0; });
   const taxable = subtotal - discountTotal;
-  const gstPerc = Number(document.getElementById('gstPercent').value||0);
-  const gstType = document.getElementById('gstType').value;
+
+  // GST is applied only when customerGST present AND override checkbox is checked
+  const custGstVal = (document.getElementById('customerGST').value || '').trim();
+  const overrideOn = document.getElementById('gstEnabledOverride').checked;
+  const gstApplicable = !!custGstVal && overrideOn;
+
+  const gstPerc = gstApplicable ? Number(document.getElementById('gstPercent').value||0) : 0;
+  const gstType = gstApplicable ? document.getElementById('gstType').value : 'no_gst';
+
   let gst=0, cgst=0, sgst=0, igst=0;
   if(gstType==='no_gst') gst=0;
   else if(gstType==='igst'){ gst = taxable * gstPerc/100; igst = gst; }
   else { gst = taxable * gstPerc/100; cgst = gst/2; sgst = gst/2; }
+
   const grand = taxable + gst;
   document.getElementById('subtotal').innerText = fmt(subtotal);
   document.getElementById('discountTotal').innerText = fmt(discountTotal);
@@ -292,12 +334,16 @@ function recalcTotals(){
   document.getElementById('gstAmount').innerText = fmt(gst);
   document.getElementById('grandTotal').innerText = fmt(grand);
   document.getElementById('amountWords').innerText = toWords(Math.round(grand));
+
+  // show/hide gst summary row in UI
+  const gstRow = document.getElementById('gstSummaryRow');
+  if(gstApplicable) gstRow.classList.remove('hidden'); else gstRow.classList.add('hidden');
 }
 
-/* ------------------------ Preview build ------------------------ */
+/* ----------------- Preview ----------------- */
 function buildPreview(){
   const docType = document.getElementById('docType').value;
-  const companyName = document.getElementById('companyName').value;
+  let companyName = (document.getElementById('companyName').value || '').toUpperCase();
   const companyGST = document.getElementById('companyGST').value;
   const companyAddress = document.getElementById('companyAddress').value.replace(/\n/g,'<br>');
   const invoiceNo = document.getElementById('invoiceNo').value;
@@ -307,14 +353,27 @@ function buildPreview(){
   const customerGST = document.getElementById('customerGST').value;
   const customerAddress = document.getElementById('customerAddress').value.replace(/\n/g,'<br>');
   const notes = document.getElementById('notes').value.replace(/\n/g,'<br>');
-  const gstPerc = Number(document.getElementById('gstPercent').value||0);
-  const gstType = document.getElementById('gstType').value;
   const logoURL = document.getElementById('logoURL').value;
 
-  // compute totals
+  // payment
+  const bankName = document.getElementById('bankName').value || '';
+  const bankAccount = document.getElementById('bankAccount').value || '';
+  const ifsc = document.getElementById('ifsc').value || '';
+  const bankBranch = document.getElementById('bankBranch').value || '';
+  const upiId = document.getElementById('upiId').value || '';
+  const paymentNote = document.getElementById('paymentNote').value || '';
+
+  // totals
   let subtotal=0, discountTotal=0;
   items.forEach(it=>{ const line = (Number(it.qty)||0)*(Number(it.rate)||0); subtotal+=line; discountTotal+=Number(it.discount)||0; });
   const taxable = subtotal - discountTotal;
+
+  const custGstVal = (document.getElementById('customerGST').value || '').trim();
+  const overrideOn = document.getElementById('gstEnabledOverride').checked;
+  const gstApplicable = !!custGstVal && overrideOn;
+  const gstPerc = gstApplicable ? Number(document.getElementById('gstPercent').value||0) : 0;
+  const gstType = gstApplicable ? document.getElementById('gstType').value : 'no_gst';
+
   let gst=0, cgst=0, sgst=0, igst=0;
   if(gstType==='no_gst') gst=0;
   else if(gstType==='igst'){ gst = taxable * gstPerc/100; igst=gst; }
@@ -322,9 +381,11 @@ function buildPreview(){
   const grand = taxable + gst;
 
   // build rows
-  const rows = items.map((it,i)=>`<tr><td class="py-2">${i+1}</td><td><div style="font-weight:600">${it.desc}</div><div class="muted" style="font-size:12px">HSN: ${it.hsn}</div></td><td class="text-right">${it.qty}</td><td class="text-right">${fmt(it.rate)}</td><td class="text-right">${fmt(it.discount)}</td><td class="text-right">${fmt(((it.qty||0)*(it.rate||0))- (it.discount||0))}</td></tr>`).join('');
+  const rows = items.map((it,i)=>`<tr><td class="py-2">${i+1}</td><td><div style="font-weight:600">${it.desc}</div><div class="lite" style="font-size:12px">HSN: ${it.hsn}</div></td><td class="text-right">${it.qty}</td><td class="text-right">${fmt(it.rate)}</td><td class="text-right">${fmt(it.discount)}</td><td class="text-right">${fmt(((it.qty||0)*(it.rate||0)) - (it.discount||0))}</td></tr>`).join('');
 
   const preview = document.getElementById('previewInner');
+  const shownDocType = (docType === 'PI' || docType === 'Personal Invoice') ? 'Personal Invoice' : docType;
+
   preview.innerHTML = `
     <div class="accent-line mb-4"></div>
     <div class="inv-header mb-4">
@@ -332,11 +393,13 @@ function buildPreview(){
         ${logoURL?`<img src="${logoURL}" alt="logo" class="logo mb-2">`:''}
         <div style="font-size:20px;font-weight:700">${companyName}</div>
         <div class="lite mt-1">${companyAddress}</div>
-        <div class="lite mt-1">GSTIN: ${companyGST}</div>
-        <div class="lite mt-1">Bank: ${document.getElementById('bankDetails').value}</div>
+        ${companyGST ? `<div class="lite mt-1">GSTIN (Supplier): ${companyGST}</div>` : ''}
+        <div class="lite mt-1">Bank: ${bankName} | A/C: ${bankAccount}</div>
+        <div class="lite mt-1">IFSC: ${ifsc} | Branch: ${bankBranch}</div>
+        <div class="lite mt-1">UPI ID: ${upiId}</div>
       </div>
       <div class="inv-meta">
-        <div style="font-size:20px;font-weight:800">${docType}</div>
+        <div style="font-size:20px;font-weight:800">${shownDocType}</div>
         <div class="lite">Invoice No: <strong>${invoiceNo}</strong></div>
         <div class="lite">Date: ${invoiceDate || ''}</div>
         ${dueDate?`<div class="lite">Due: ${dueDate}</div>`:''}
@@ -347,13 +410,13 @@ function buildPreview(){
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <div>
         <div style="font-weight:700">Bill To</div>
-        <div class="muted">${customerName}</div>
-        <div class="muted">${customerAddress}</div>
-        <div class="muted">GSTIN: ${customerGST}</div>
+        <div class="lite">${customerName}</div>
+        <div class="lite">${customerAddress}</div>
+        ${custGstVal ? `<div class="lite">GSTIN (Customer): ${custGstVal}</div>` : ''}
       </div>
       <div class="text-right summary">
-        <div class="muted">Taxable Value: <strong>₹ ${fmt(taxable)}</strong></div>
-        ${gstType==='igst'?`<div class="muted">IGST (${gstPerc}%): <strong>₹ ${fmt(igst)}</strong></div>`:`<div class="muted">CGST (${(gstPerc/2).toFixed(2)}%): <strong>₹ ${fmt(cgst)}</strong></div><div class="muted">SGST (${(gstPerc/2).toFixed(2)}%): <strong>₹ ${fmt(sgst)}</strong></div>`}
+        <div class="lite">Taxable Value: <strong>₹ ${fmt(taxable)}</strong></div>
+        ${gstApplicable ? (gstType==='igst'?`<div class="lite">IGST (${gstPerc}%): <strong>₹ ${fmt(igst)}</strong></div>`:`<div class="lite">CGST (${(gstPerc/2).toFixed(2)}%): <strong>₹ ${fmt(cgst)}</strong></div><div class="lite">SGST (${(gstPerc/2).toFixed(2)}%): <strong>₹ ${fmt(sgst)}</strong></div>`) : ''}
         <div style="font-size:18px;font-weight:800;margin-top:6px">Grand Total: ₹ ${fmt(grand)}</div>
       </div>
     </div>
@@ -367,13 +430,23 @@ function buildPreview(){
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <div class="muted">Notes:</div>
-        <div style="margin-top:6px">${notes}</div>
+        <div class="lite">Notes:</div>
+        <div id="previewNotes" contenteditable="true" style="margin-top:6px; min-height:60px; border:1px dashed rgba(15,23,42,0.04); padding:8px;">${notes.replace(/<br>/g,'\n')}</div>
+
+        <div style="margin-top:12px">
+          <div class="lite" style="font-weight:700">Payment details</div>
+          <div class="lite">Bank: ${bankName}</div>
+          <div class="lite">A/C No: ${bankAccount}</div>
+          <div class="lite">IFSC: ${ifsc}</div>
+          <div class="lite">Branch: ${bankBranch}</div>
+          <div class="lite">UPI: ${upiId}</div>
+          ${paymentNote?`<div class="lite" style="margin-top:6px">${paymentNote}</div>`:''}
+        </div>
       </div>
       <div class="text-right">
-        <div class="muted">Subtotal: ₹ ${fmt(subtotal)}</div>
-        <div class="muted">Discount: ₹ ${fmt(discountTotal)}</div>
-        <div class="muted">GST: ₹ ${fmt(gst)}</div>
+        <div class="lite">Subtotal: ₹ ${fmt(subtotal)}</div>
+        <div class="lite">Discount: ₹ ${fmt(discountTotal)}</div>
+        ${gstApplicable ? `<div class="lite">GST: ₹ ${fmt(gst)}</div>` : ''}
         <div style="font-weight:800;font-size:18px">Total Payable: ₹ ${fmt(grand)}</div>
         <div class="small lite mt-2">Amount (in words): ${toWords(Math.round(grand))}</div>
       </div>
@@ -382,42 +455,48 @@ function buildPreview(){
     <div class="sign-box mt-6 grid grid-cols-2 gap-4">
       <div>
         <div style="font-weight:700">Prepared by</div>
-        <div class="muted small">${document.getElementById('companyName').value}</div>
+        <div class="lite small">${companyName}</div>
       </div>
       <div class="text-right">
-        <div style="font-weight:700">For ${document.getElementById('companyName').value}</div>
+        <div style="font-weight:700">For ${companyName}</div>
         <div style="margin-top:18px">Authorized Signatory</div>
       </div>
     </div>
 
-    <div class="mt-6 small muted">This is a computer generated ${docType.toLowerCase()} and does not require signature unless required by the recipient.</div>
-
+    <div class="mt-6 small lite">This is a computer generated ${shownDocType.toLowerCase()} and does not require signature unless required by the recipient.</div>
   `;
 
-  // render QR code for quick payment or invoice link
+  // QR code (invoice|amount|upi)
   setTimeout(()=>{
     const qHolder = document.getElementById('invoiceQR');
     if(qHolder) qHolder.remove();
     const qrDiv = document.createElement('div'); qrDiv.id='invoiceQR'; qrDiv.style.float='right'; qrDiv.style.marginTop='-120px';
     preview.appendChild(qrDiv);
-    new QRCode(qrDiv, {text:`Invoice:${invoiceNo}|Amount:${fmt(grand)}`, width:90, height:90});
+    const qrText = `Invoice:${invoiceNo}|Amount:${fmt(grand)}${upiId?`|UPI:${upiId}`:''}`;
+    new QRCode(qrDiv, {text:qrText, width:90, height:90});
   },50);
+
+  // sync preview notes back to textarea
+  setTimeout(()=>{
+    const p = document.getElementById('previewNotes');
+    if(p){
+      p.oninput = ()=>{ document.getElementById('notes').value = p.innerText.trim(); };
+      document.getElementById('notes').oninput = ()=>{ p.innerText = document.getElementById('notes').value; };
+    }
+  },100);
 }
 
-/* ------------------------ PDF generation (multi-page friendly) ------------------------ */
+/* ----------------- PDF generation ----------------- */
 async function generatePDF(){
   buildPreview();
   const el = document.getElementById('previewInner');
-  // We'll render with html2canvas at high scale and then split to A4 pages
-  const originalWidth = el.offsetWidth;
-  const scale = 2; // higher scale for quality
+  const scale = 2;
   const canvas = await html2canvas(el, {scale:scale, useCORS:true, allowTaint:true});
   const imgData = canvas.toDataURL('image/png');
-  const imgWidth = 595.28; // A4 width in pts
-  const pageHeight = 841.89; // A4 height in pts
+  const imgWidth = 595.28; // pts A4
+  const pageHeight = 841.89;
   const pxPerPt = canvas.width / imgWidth;
   const imgHeightPts = canvas.height / pxPerPt;
-
   const pdf = new jspdf.jsPDF({unit:'pt', format:'a4'});
   let position = 0;
   let remainingHeight = imgHeightPts;
@@ -431,7 +510,7 @@ async function generatePDF(){
   pdf.save(`${no}.pdf`);
 }
 
-/* ------------------------ Catalog modal ------------------------ */
+/* ----------------- Catalog modal ----------------- */
 function openCatalog(){
   document.getElementById('catalogModal').classList.remove('hidden');
   const body = document.getElementById('catalogBody'); body.innerHTML='';
@@ -443,22 +522,79 @@ function openCatalog(){
 }
 function addFromCatalog(i){ addItem({desc:catalog[i].desc, hsn:catalog[i].hsn, qty:1, rate:catalog[i].rate, discount:0}); }
 
-/* ------------------------ Local save/load (JSON) ------------------------ */
+/* ----------------- Save / Load JSON ----------------- */
 function saveJSON(){
-  const payload = {companyName:document.getElementById('companyName').value, companyGST:document.getElementById('companyGST').value, companyAddress:document.getElementById('companyAddress').value, bankDetails:document.getElementById('bankDetails').value, invoiceNo:document.getElementById('invoiceNo').value, invoiceDate:document.getElementById('invoiceDate').value, dueDate:document.getElementById('dueDate').value, placeOfSupply:document.getElementById('placeOfSupply').value, docType:document.getElementById('docType').value, customerName:document.getElementById('customerName').value, customerGST:document.getElementById('customerGST').value, customerAddress:document.getElementById('customerAddress').value, notes:document.getElementById('notes').value, gstPercent:document.getElementById('gstPercent').value, gstType:document.getElementById('gstType').value, items:items };
+  const payload = {
+    companyName:document.getElementById('companyName').value,
+    companyGST:document.getElementById('companyGST').value,
+    companyAddress:document.getElementById('companyAddress').value,
+    bankName:document.getElementById('bankName').value,
+    bankAccount:document.getElementById('bankAccount').value,
+    ifsc:document.getElementById('ifsc').value,
+    bankBranch:document.getElementById('bankBranch').value,
+    upiId:document.getElementById('upiId').value,
+    paymentNote:document.getElementById('paymentNote').value,
+    invoiceNo:document.getElementById('invoiceNo').value,
+    invoiceDate:document.getElementById('invoiceDate').value,
+    dueDate:document.getElementById('dueDate').value,
+    placeOfSupply:document.getElementById('placeOfSupply').value,
+    docType:document.getElementById('docType').value,
+    customerGST:document.getElementById('customerGST').value,
+    gstEnabledOverride:document.getElementById('gstEnabledOverride').checked,
+    gstType:document.getElementById('gstType').value,
+    gstPercent:document.getElementById('gstPercent').value,
+    customerName:document.getElementById('customerName').value,
+    customerAddress:document.getElementById('customerAddress').value,
+    notes:document.getElementById('notes').value,
+    items:items
+  };
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (document.getElementById('invoiceNo').value||'invoice') + '.json'; a.click();
 }
 function loadJSON(){
-  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json'; inp.onchange = e=>{ const f = e.target.files[0]; const r = new FileReader(); r.onload = ev=>{ try{ const data = JSON.parse(ev.target.result); document.getElementById('companyName').value=data.companyName||''; document.getElementById('companyGST').value=data.companyGST||''; document.getElementById('companyAddress').value=data.companyAddress||''; document.getElementById('bankDetails').value=data.bankDetails||''; document.getElementById('invoiceNo').value=data.invoiceNo||''; document.getElementById('invoiceDate').value=data.invoiceDate||''; document.getElementById('dueDate').value=data.dueDate||''; document.getElementById('placeOfSupply').value=data.placeOfSupply||''; document.getElementById('docType').value=data.docType||'Tax Invoice'; document.getElementById('customerName').value=data.customerName||''; document.getElementById('customerGST').value=data.customerGST||''; document.getElementById('customerAddress').value=data.customerAddress||''; document.getElementById('notes').value=data.notes||''; document.getElementById('gstPercent').value=data.gstPercent||'12'; document.getElementById('gstType').value=data.gstType||'cgst_sgst'; items = data.items || []; renderItems(); }catch(err){ alert('Invalid JSON file') } }; r.readAsText(f); }; inp.click(); }
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json'; inp.onchange = e=>{
+    const f = e.target.files[0]; const r = new FileReader();
+    r.onload = ev=>{
+      try{
+        const data = JSON.parse(ev.target.result);
+        document.getElementById('companyName').value=data.companyName||'';
+        document.getElementById('companyGST').value=data.companyGST||'';
+        document.getElementById('companyAddress').value=data.companyAddress||'';
+        document.getElementById('bankName').value=data.bankName||'';
+        document.getElementById('bankAccount').value=data.bankAccount||'';
+        document.getElementById('ifsc').value=data.ifsc||'';
+        document.getElementById('bankBranch').value=data.bankBranch||'';
+        document.getElementById('upiId').value=data.upiId||'';
+        document.getElementById('paymentNote').value=data.paymentNote||'';
+        document.getElementById('invoiceNo').value=data.invoiceNo||'';
+        document.getElementById('invoiceDate').value=data.invoiceDate||'';
+        document.getElementById('dueDate').value=data.dueDate||'';
+        document.getElementById('placeOfSupply').value=data.placeOfSupply||'';
+        document.getElementById('docType').value=data.docType||'Tax Invoice';
+        document.getElementById('customerGST').value = data.customerGST || '';
+        document.getElementById('gstEnabledOverride').checked = !!data.gstEnabledOverride;
+        document.getElementById('gstType').value = data.gstType || 'cgst_sgst';
+        document.getElementById('gstPercent').value = data.gstPercent || '12';
+        document.getElementById('customerName').value=data.customerName||'';
+        document.getElementById('customerAddress').value=data.customerAddress||'';
+        document.getElementById('notes').value=data.notes||'';
+        items = data.items || [];
+        checkCustomerGstPresence();
+        renderItems();
+      }catch(err){ alert('Invalid JSON file') }
+    }; r.readAsText(f);
+  }; inp.click();
+}
 
-/* ------------------------ Download HTML snapshot ------------------------ */
+/* ----------------- Download HTML snapshot ----------------- */
 function downloadHTML(){ buildPreview(); const html = `<!doctype html><html>${document.documentElement.innerHTML}</html>`; const blob = new Blob([html], {type:'text/html'}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(document.getElementById('invoiceNo').value||'invoice') + '.html'; a.click(); }
 
-/* ------------------------ Events binding ------------------------ */
+/* ----------------- Events ----------------- */
 document.getElementById('addRow').addEventListener('click', ()=>addItem());
+document.getElementById('customerGST').addEventListener('input', ()=>{ checkCustomerGstPresence(); });
 document.getElementById('gstPercent').addEventListener('change', recalcTotals);
 document.getElementById('gstType').addEventListener('change', recalcTotals);
+document.getElementById('gstEnabledOverride').addEventListener('change', recalcTotals);
 document.getElementById('previewBtn').addEventListener('click', ()=>{ buildPreview(); window.scrollTo({top: document.getElementById('invoicePreview').offsetTop, behavior:'smooth'}); });
 document.getElementById('generatePdfBtn').addEventListener('click', ()=>{ generatePDF(); });
 document.getElementById('downloadHtml').addEventListener('click', ()=>{ downloadHTML(); });
@@ -470,26 +606,39 @@ document.getElementById('catalogModal').addEventListener('click', (e)=>{ if(e.ta
 document.getElementById('saveJSON').addEventListener('click', saveJSON);
 document.getElementById('loadJSON').addEventListener('click', loadJSON);
 document.getElementById('loadSample').addEventListener('click', ()=>{
-  // sample prefill
-  document.getElementById('companyName').value='Ellectra Innovations Pvt Ltd';
-  document.getElementById('companyGST').value='33ABCDE1234F1Z5';
+  document.getElementById('companyName').value='ELLECTRA ELECTRONICS';
+  document.getElementById('companyGST').value='';
   document.getElementById('companyAddress').value='12, Industrial Park\nChennai\nTamil Nadu - 600001';
+  document.getElementById('bankName').value='State Bank of India';
+  document.getElementById('bankAccount').value='1234567890';
+  document.getElementById('ifsc').value='SBIN0001234';
+  document.getElementById('bankBranch').value='Chennai';
+  document.getElementById('upiId').value='ellectra@upi';
+  document.getElementById('paymentNote').value='Please pay via NEFT/UPI within 30 days';
   document.getElementById('invoiceNo').value='PI-2025-1001';
   document.getElementById('invoiceDate').value=new Date().toISOString().slice(0,10);
   document.getElementById('dueDate').value='';
+  document.getElementById('docType').value='Personal Invoice';
   document.getElementById('customerName').value='DroneTech Pvt Ltd';
-  document.getElementById('customerGST').value='27XYZAB1234C1Z9';
+  document.getElementById('customerGST').value=''; // leave empty to have NO GST by default
   document.getElementById('customerAddress').value='78, Tech Park\nBangalore\nKarnataka - 560001';
   items = [];
   addItem({desc:'Li-Po Battery 2000mAh 3.7V', hsn:'85076000', qty:10, rate:450, discount:0});
   addItem({desc:'ESP32 Development Board', hsn:'85423190', qty:5, rate:550, discount:0});
+  checkCustomerGstPresence();
   renderItems();
 });
 
 document.getElementById('downloadHtml').addEventListener('click', ()=>downloadHTML());
 
-document.addEventListener('DOMContentLoaded', ()=>{ const today=new Date().toISOString().slice(0,10); document.getElementById('invoiceDate').value=today; addItem({desc:'Li-Po Battery 2000mAh 3.7V', hsn:'85076000', qty:1, rate:450, discount:0}); addItem({desc:'ESP32 Development Board', hsn:'85423190', qty:2, rate:550, discount:0}); renderItems(); });
-
+document.addEventListener('DOMContentLoaded', ()=>{
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('invoiceDate').value=today;
+  addItem({desc:'Li-Po Battery 2000mAh 3.7V', hsn:'85076000', qty:1, rate:450, discount:0});
+  addItem({desc:'ESP32 Development Board', hsn:'85423190', qty:2, rate:550, discount:0});
+  checkCustomerGstPresence();
+  renderItems();
+});
 </script>
 </body>
 </html>
